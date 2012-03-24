@@ -20,8 +20,8 @@ class Drawer
 
   def self.create_animation file_names
     animated = ImageList.new *file_names
-    animated.delay = 100
-    animated.ticks_per_second = 100
+    animated.delay = 100 / 3
+    animated.ticks_per_second = 100 / 3
     animated.iterations = 1000
     animated.write("output/animated.gif")
   end

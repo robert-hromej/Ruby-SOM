@@ -4,41 +4,49 @@ module GridType
 
     def find_neighbors(neurons, data_item, radius)
       founded = {}
-      for_found = [data_item]
+      for_found = [neurons.index(data_item)]
 
-      old = [data_item]
+      old = [neurons.index(data_item)]
 
+      #p 11111111
+      #puts Benchmark.realtime {
       (1..radius).each do |r|
-
         founded[r] ||= []
 
-        for_found.each do |neuron|
-          _neighbors = neighbors(neurons, neuron)
-          _neighbors -= old
-          old = founded.values.flatten.uniq
-          founded[r] |= _neighbors
-        end
+        for_found.each do |index|
 
+          _neighbors = neighbors(index)
+
+          _neighbors -= old
+          old = founded.values.flatten #.uniq
+          founded[r] += _neighbors
+        end
         for_found = founded[r]
+      end
+      #}
+      founded.each do |_, value|
+        value.uniq!
       end
       founded
     end
 
-    def neighbors(neurons, data_item)
-      index = neurons.index(data_item)
+    def neighbors(index)
+      #unless data_item.neighbors
+      #  index = neurons.index(data_item)
 
       x, y = convert_to_coordinate index
       coordinates = [
-        [x-1, y],
-        [x+1, y],
-        [x, y-1],
-        [x, y+1]
+         [x-1, y],
+         [x+1, y],
+         [x, y-1],
+         [x, y+1]
       ]
 
       coordinates = coordinates.find_all { |coordinate| correct_coordinate? coordinate }
-      indexes = coordinates.map { |c| convert_to_index c }
-
-      indexes.map { |index| neurons[index] }
+      #data_item.neighbors =
+      coordinates.map { |c| convert_to_index c }
+      #end
+      #data_item.neighbors#.map { |i| neurons[i] }
     end
   end
 

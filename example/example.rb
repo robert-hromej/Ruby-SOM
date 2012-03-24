@@ -10,8 +10,8 @@ require './lib/grid'
 require './lib/drawer'
 
 #require './datasets/three_color'
-require './datasets/eight_color'
-#require './datasets/iris'
+#require './datasets/eight_color'
+require './datasets/iris'
 #require './datasets/cows'
 
 Dir.mkdir 'output' unless Dir.exist? 'output'
@@ -22,12 +22,12 @@ if File.exist? som_file
   som = SOM.load som_file
 else
 
-  grid = Grid.new(:type => :square, :rows => 50, :cols => 50)
+  grid = Grid.new(:type => :square, :rows => 40, :cols => 40)
 
   attributes = {:dimension => DIMENSION,
                 :grid => grid,
                 :data => DATA_SET,
-                :neighborhood_radius => 25,
+                :neighborhood_radius => 10,
                 :learning_rate => 0.1,
                 :epochs => 500}
 

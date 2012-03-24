@@ -1,10 +1,20 @@
 class Neuron
-  attr_accessor :dimension
+  attr_accessor :dimension, :neighbors
   attr_writer :weights
 
   def initialize(dimension)
     self.dimension = dimension
   end
+
+  #def neighbors
+  #  #return nil unless @neighbors
+  #
+  #  @neighbors
+  #end
+  #
+  #def neighbors=(indexes)
+  #  @neighbors = indexes
+  #end
 
   def weights
     @weights ||= Array.new(dimension).map { rand }

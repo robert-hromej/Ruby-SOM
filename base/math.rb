@@ -4,6 +4,7 @@ module Math
     point1.each_with_index do |value, index|
       dist += (value - point2[index])**2
     end
+    #dist
     Math.sqrt(dist)
   end
 end
