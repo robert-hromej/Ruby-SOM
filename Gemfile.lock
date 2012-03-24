@@ -1,0 +1,16 @@
+GEM
+  remote: http://rubygems.org/
+  specs:
+    color (1.4.1)
+    normalizer (0.0.1)
+    rmagick (2.13.1)
+    scruffy (0.2.6)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  color
+  normalizer
+  rmagick
+  scruffy
