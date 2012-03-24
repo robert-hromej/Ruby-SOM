@@ -14,41 +14,49 @@ require './datasets/eight_color'
 #require './datasets/iris'
 #require './datasets/cows'
 
-Dir.mkdir 'output' unless Dir.exist? 'output'
+folders = ['output', 'dump']
+folders.each { |folder| Dir.mkdir folder unless Dir.exist? folder }
 
-som_file = ''
+ceil_size = 10
+
+attributes = {dimension: DIMENSION,
+              grid: {type: :hexagonal, rows: 40, cols: 40},
+              #grid: {type: :square, rows: 16, cols: 16},
+              data: DATA_SET,
+              neighborhood_radius: 30,
+              learning_rate: 0.8,
+              epochs: 100}
+
+som_file = SOM.file_name(attributes)
+
+som_file = "dump/#{som_file}.som"
 
 if File.exist? som_file
   som = SOM.load som_file
 else
-
-  grid = Grid.new(:type => :square, :rows => 50, :cols => 50)
-
-  attributes = {:dimension => DIMENSION,
-                :grid => grid,
-                :data => DATA_SET,
-                :neighborhood_radius => 25,
-                :learning_rate => 0.1,
-                :epochs => 500}
-
   som = SOM.new attributes
-
-  file_names = []
-
-  ceil_size = 5
-
-  som.run_train do |epoch|
-    if epoch%5 == 0 or epoch == 499
-      drawer = Drawer.new(:width => som.grid.cols*ceil_size, :height => som.grid.rows*ceil_size, :som => som)
-      file_names << "output/epoch_#{epoch+1}.gif"
-      drawer.save "output/epoch_#{epoch+1}.gif"
-    end
-  end
-
-  Drawer.create_animation file_names
-
-  #som.save
+  som.run_train
+  som.save
 end
+
+file_names = som.history.map do |iteration, neurons|
+  if iteration == som.epochs-1 or iteration%3 == 0
+    som.neurons = Marshal.load(neurons)
+    som.current_iteration = iteration
+    Drawer.new(width: som.grid.cols*ceil_size,
+               height: som.grid.rows*ceil_size,
+               som: som).save
+    #Drawer.new(width: som.grid.cols*54*2 + 54,
+    #           height: som.grid.rows*93.8 + 93.8,
+    #           som: som).save
+  end
+end
+
+Drawer.create_animation(som.file_name, file_names.compact)
+
+#drawer = Drawer.new(:width => som.grid.cols*ceil_size, :height => som.grid.rows*ceil_size, :som => som)
+#drawer.save
+
 
 #require 'scruffy'
 #

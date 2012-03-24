@@ -1,86 +1,51 @@
 module GridType
   module Square
     include GridType
-
-    def find_neighbors(neurons, data_item, radius)
-      founded = {}
-      for_found = [data_item]
-
-      old = [data_item]
-
-      (1..radius).each do |r|
-
-        founded[r] ||= []
-
-        for_found.each do |neuron|
-          _neighbors = neighbors(neurons, neuron)
-          _neighbors -= old
-          old = founded.values.flatten.uniq
-          founded[r] |= _neighbors
-        end
-
-        for_found = founded[r]
-      end
-      founded
-    end
-
-    def neighbors(neurons, data_item)
-      index = neurons.index(data_item)
-
-      x, y = convert_to_coordinate index
-      coordinates = [
-        [x-1, y],
-        [x+1, y],
-        [x, y-1],
-        [x, y+1]
+    def coordinate_matrix(x, y)
+      [
+         [x-1, y],
+         [x+1, y],
+         [x, y-1],
+         [x, y+1]
       ]
-
-      coordinates = coordinates.find_all { |coordinate| correct_coordinate? coordinate }
-      indexes = coordinates.map { |c| convert_to_index c }
-
-      indexes.map { |index| neurons[index] }
     end
   end
 
   module Hexagonal
-    # TODO need implementing
-    def neighbors(neurons, index, radius)
-      []
-      #def neighbors(i, n=1)
-      #  index = @neurons.index(i) if i.is_a?(Neuron)
-      #  x, y = coordinate index
-      #  array = []
-      #  grouped_neurons.each_with_index do |col, col_ind|
-      #    col.each_with_index do |value, row_ind|
-      #      array << value if x == col_ind and [y-1, y+1].include? row_ind
-      #      if [x-1, x+1].include? col_ind
-      #        array << value if y == row_ind
-      #        if (x%2) == 0
-      #          array << value if y-1 == row_ind
-      #        else
-      #          array << value if y+1 == row_ind
-      #        end
-      #      end
-      #    end
-      #  end
-      #  array
-      #end
+    include GridType
+    def coordinate_matrix(x, y)
+      i = (x%2 == 0) ? 1 : -1
+      [
+         [x-1, y],
+         [x+1, y],
+         [x, y-1],
+         [x, y+1],
+         [x-1, y+i],
+         [x+1, y+i]
+      ]
     end
   end
 
-  module Line
-    def neighbors(neurons, data_item, radius)
-      return if radius == 0
+  def find_neighbors(neurons, data_item, radius)
+    founded = {}
+    for_found = [data_item]
 
-      index = neurons.index(data_item)
+    old = [data_item]
 
-      coordinates = [index-1, index+1]
-      coordinates = coordinates.find_all { |coordinate| (0...neurons.size).include? coordinate }
-      _neighbors = coordinates.map { |index| neurons[index] }
+    (1..radius).each do |r|
 
-      sub_neighbors = _neighbors.map { |neighbor| neighbors(neurons, neighbor, radius-1) }.flatten
-      ((_neighbors | sub_neighbors) - [data_item]).compact
+      founded[r] ||= []
+
+      for_found.each do |neuron|
+        _neighbors = neighbors(neurons, neuron)
+        _neighbors -= old
+        old = founded.values.flatten.uniq
+        founded[r] |= _neighbors
+      end
+
+      for_found = founded[r]
     end
+    founded
   end
 
   def convert_to_coordinate(index)
@@ -96,5 +61,18 @@ module GridType
 
   def correct_coordinate?(coordinate)
     (0...cols).include? coordinate[0] and (0...rows).include? coordinate[1]
+  end
+
+  def neighbors(neurons, data_item)
+    index = neurons.index(data_item)
+
+    x, y = convert_to_coordinate index
+
+    coordinates = coordinate_matrix(x, y)
+
+    coordinates = coordinates.find_all { |coordinate| correct_coordinate? coordinate }
+    indexes = coordinates.map { |c| convert_to_index c }
+
+    indexes.map { |index| neurons[index] }
   end
 end

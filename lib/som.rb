@@ -2,7 +2,7 @@ require 'normalizer'
 require 'digest/md5'
 
 class SOM
-  attr_accessor :dimension, :neighborhood_radius, :learning_rate, :epochs
+  attr_accessor :dimension, :neighborhood_radius, :learning_rate, :epochs, :current_iteration
   attr_reader :grid, :data
 
   def initialize(attributes)
@@ -17,6 +17,10 @@ class SOM
   def data=(_data)
     @normalized_data = nil
     @data = _data
+  end
+
+  def history
+    @history ||= {}
   end
 
   def normalized_data
@@ -37,22 +41,23 @@ class SOM
     Marshal.load(data)
   end
 
-  def hash_name
-    name = {:dimension => dimension,
-            :data => data,
-            :neighborhood_radius => neighborhood_radius,
-            :learning_rate => learning_rate,
-            :grid => grid.hash_name,
-            :epochs => epochs}
-    Digest::MD5.hexdigest name.to_s
+  def file_name
+    SOM.file_name self
   end
 
-  def save # filepath
-    filepath = hash_name
-    if filepath
-      File.open(filepath, "w+") do |f|
-        f.write Marshal.dump(self)
-      end
+  def self.file_name _som
+    if _som.is_a? SOM
+      data_hash = Digest::MD5.hexdigest _som.data.to_s
+      "#{_som.grid}_#{_som.learning_rate}_#{_som.neighborhood_radius}_#{_som.dimension}_#{_som.epochs}_#{data_hash}"
+    else
+      data_hash = Digest::MD5.hexdigest _som[:data].to_s
+      "#{_som[:grid][:type]}_#{_som[:grid][:rows]}_#{_som[:grid][:cols]}_#{_som[:learning_rate]}_#{_som[:neighborhood_radius]}_#{_som[:dimension]}_#{_som[:epochs]}_#{data_hash}"
+    end
+  end
+
+  def save
+    File.open("dump/#{file_name}.som", "w+") do |f|
+      f.write Marshal.dump(self)
     end
   end
 
@@ -68,10 +73,16 @@ class SOM
     @neurons ||= Array.new(size).map { Neuron.new(dimension) }
   end
 
+  def neurons=(n)
+    @neurons = n
+  end
+
   def run_train
     epochs.times do |epoch|
+      @current_iteration = epoch
       train_epoch epoch.to_f/epochs
-      yield epoch
+
+      history[epoch] = Marshal.dump(self.neurons)
     end
   end
 
@@ -79,7 +90,7 @@ class SOM
     puts epoch_rate
     rate = learning_rate * (1 - epoch_rate)
 
-    (10 - 1) / ( 100 * 0.65 )
+    (10 - 1) / (100 * 0.65)
 
     #d_diff = (d - 1.0) / (n * 0.65)
 

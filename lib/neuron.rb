@@ -15,6 +15,7 @@ class Neuron
     raise "@weights.size != n.w.size" unless weights.size == data_item.size
 
     dimension.times { |i| weights[i] += rate * (data_item[i] - weights[i]) }
+    self
   end
 
   def reset_updated_status

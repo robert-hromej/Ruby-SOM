@@ -21,9 +21,8 @@ class Grid
     draw_ceils(gc, data, width-100, height-100)
   end
 
-  def hash_name
-    name = {:type => type, :rows => rows, :cols => cols}
-    Digest::MD5.hexdigest name.to_s
+  def to_s
+    "#{type}_#{rows}_#{cols}"
   end
 
   private
