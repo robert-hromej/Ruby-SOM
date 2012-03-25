@@ -39,8 +39,14 @@ else
   som.save
 end
 
-file_names = som.history.map do |iteration, neurons|
-  if iteration == som.epochs-1 or iteration%3 == 0
+require 'benchmark'
+
+p "start"
+
+puts Benchmark.realtime {
+  file_names = som.history.map do |iteration, neurons|
+    p iteration
+    #if iteration == som.epochs-1 or iteration%3 == 0
     som.neurons = Marshal.load(neurons)
     som.current_iteration = iteration
     Drawer.new(width: som.grid.cols*ceil_size,
@@ -49,10 +55,12 @@ file_names = som.history.map do |iteration, neurons|
     #Drawer.new(width: som.grid.cols*54*2 + 54,
     #           height: som.grid.rows*93.8 + 93.8,
     #           som: som).save
+    #end
   end
-end
+}
 
-Drawer.create_animation(som.file_name, file_names.compact)
+
+#Drawer.create_animation(som.file_name, file_names.compact)
 
 #drawer = Drawer.new(:width => som.grid.cols*ceil_size, :height => som.grid.rows*ceil_size, :som => som)
 #drawer.save
