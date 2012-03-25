@@ -1,13 +1,14 @@
 require 'digest/md5'
 
 class Grid
-  attr_accessor :type, :rows, :cols
+  attr_accessor :type, :rows, :cols, :ceil_size
   include GridType
 
   def initialize(_grid)
     self.type = _grid[:type]
     self.rows = _grid[:rows]
     self.cols = _grid[:cols]
+    self.ceil_size = _grid[:ceil_size]
 
     include_module
   end
