@@ -14,14 +14,6 @@ class Drawer
     "#{dir}/iteration_#{som.current_iteration}.#{format}"
   end
 
-  #def self.create_animation dir, file_names
-  #  animated = ImageList.new *file_names
-  #  animated.delay = 100 / 5
-  #  animated.ticks_per_second = 100 / 5
-  #  animated.iterations = 1000
-  #  animated.write("output/#{dir}/animated.gif")
-  #end
-
   def draw
     draw_ceils
     save_to_file file_name
@@ -70,17 +62,15 @@ class Drawer
         neuron = som.find_neuron_by_coordinate [col, row]
         distance = som.distance_with_neighbors neuron
         weight = (distance - min_distance) / (max_distance - min_distance)
-        draw_ceil col, row, weight
+        draw_ceil col, row, weight, neuron
       end
     end
   end
 
-  def draw_ceil col, row, weight
+  def draw_ceil col, row, weight, neuron = nil
     #a = (0..2).to_a.map{ |i| neuron.weights[i]*256 }
-    #
     #color = a.map{|c| (c == a.max) ? (256 - c*weight) : 0 }
-    #
-    #draw.fill  Color::RGB.new(*color).html
+    #color = Color::RGB.new(*color).html
 
     #p weight
     #color = "##{"%06x" % (0xffffff - weight*0xffffff)}"
@@ -118,7 +108,7 @@ class Drawer
     require 'rasem'
     Rasem::SVGImage.new som.grid.width.ceil, som.grid.height.ceil
   end
-  
+
   def format
     case type
     when :rmagick then 'gif'

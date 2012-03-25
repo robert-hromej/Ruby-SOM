@@ -1,20 +1,10 @@
 class Neuron
-  attr_accessor :dimension, :neighbors
+  attr_accessor :dimension
   attr_writer :weights
 
   def initialize(dimension)
     self.dimension = dimension
   end
-
-  #def neighbors
-  #  #return nil unless @neighbors
-  #
-  #  @neighbors
-  #end
-  #
-  #def neighbors=(indexes)
-  #  @neighbors = indexes
-  #end
 
   def weights
     @weights ||= Array.new(dimension).map { rand }
@@ -33,11 +23,11 @@ class Neuron
   end
 
   def average_weight
-    weights.inject(0){ |sum, w| sum += w }/weights.size
+    weights.sum / weights.size
   end
 
   def distance other_neuron
-    Math.euclidean_distance self.weights, other_neuron.weights
+    Math.euclidean_distance weights, other_neuron.weights
   end
 
   def inspect
@@ -53,11 +43,4 @@ class Neuron
   def already_updated!
     @already_updated = true
   end
-
-  # TODO dont need this merhod
-  #def move_close_to(n)
-  #  raise "@weights.size != n.w.size" unless weights.size == n.w.size
-  #
-  #  dimension.times { |i| weights[i] = n.w[i] + (0.01 * (rand-0.5)) }
-  #end
 end

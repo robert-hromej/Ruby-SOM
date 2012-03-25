@@ -1,8 +1,6 @@
 require 'normalizer'
 require 'digest/md5'
 
-require 'benchmark'
-
 class SOM
   attr_accessor :dimension, :neighborhood_radius, :learning_rate, :epochs, :current_iteration
   attr_reader :grid, :data
@@ -34,13 +32,8 @@ class SOM
   end
 
   def self.load filepath
-    data = ""
-    File.open(filepath) do |f|
-      while line = f.gets
-        data << line
-      end
-    end
-    Marshal.load(data)
+    data = File.open(filepath, 'rb') { |f| f.read }
+    Marshal.load data
   end
 
   def file_name
@@ -92,35 +85,22 @@ class SOM
     puts epoch_rate
     rate = learning_rate * (1 - epoch_rate)
 
-    (10 - 1) / (100 * 0.65)
-
+    #(10 - 1) / (100 * 0.65)
     #d_diff = (d - 1.0) / (n * 0.65)
 
     radius = [neighborhood_radius*(1-epoch_rate), 1].max
 
     normalized_data.each { |data_item| train_data_item(data_item, rate, radius) }
-    #sleep 5
   end
 
   def train_data_item(data_item, rate, radius)
-
-    #p "def train_data_item(data_item, rate, radius)"
-
     neurons.each { |neuron| neuron.reset_updated_status }
 
-    neuron = nil
-    #puts Benchmark.realtime {
-      neuron = closest(data_item)
-    #}
-
+    neuron = closest(data_item)
     neuron.update!(data_item, rate)
 
-    #all_neighbors = nil
-    #puts Benchmark.realtime {
-      all_neighbors = neighbors(neuron, radius)
-    #}
+    all_neighbors = neighbors(neuron, radius)
 
-    #puts Benchmark.realtime {
     all_neighbors.each do |_, neighbors|
       rate -= rate / (all_neighbors.size.to_f + 1.0)
       neighbors.each do |index|
@@ -128,7 +108,6 @@ class SOM
         neighbor.update!(data_item, rate)
       end
     end
-    #}
   end
 
   def neighbors neuron, radius = nil
