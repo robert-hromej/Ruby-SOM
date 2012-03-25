@@ -38,6 +38,9 @@ class Drawer
       canvas.write file_name
     when :chunky
       drawer.save file_name, :interlace => true, :compression => Zlib::NO_COMPRESSION
+    when :rasem
+      drawer.close
+      File.open(file_name, "w") { |f| f << drawer.output }
     end
   end
 
@@ -47,6 +50,7 @@ class Drawer
     @drawer = case type
               when :rmagick then rmagick_drawer
               when :chunky then chunky_drawer
+              when :rasem then rasem_drawer
               else raise "unknown type '#{type}'"
               end
   end
@@ -93,6 +97,9 @@ class Drawer
       drawer.polygon *coordinates
     when :chunky
       drawer.polygon coordinates.flatten, 0, color
+    when :rasem
+      coordinates << {fill: color}
+      drawer.polygon *coordinates
     end
   end
 
@@ -107,10 +114,16 @@ class Drawer
     ChunkyPNG::Image.new som.grid.width.ceil, som.grid.height.ceil
   end
 
+  def rasem_drawer
+    require 'rasem'
+    Rasem::SVGImage.new som.grid.width.ceil, som.grid.height.ceil
+  end
+  
   def format
     case type
     when :rmagick then 'gif'
     when :chunky then 'png'
+    when :rasem then 'svg'
     end
   end
 end
