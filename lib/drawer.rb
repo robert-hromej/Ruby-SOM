@@ -135,3 +135,15 @@ class Drawer
     end
   end
 end
+
+#size = 1
+#
+#def grid(size)
+#    scale = Math.sqrt(3)/2
+#  [[-size*scale, size/2],
+#   [0, size],
+#   [size*scale, size/2],
+#   [size*scale, -size/2],
+#   [0, -size],
+#   [-size*scale, -size/2]]
+#end

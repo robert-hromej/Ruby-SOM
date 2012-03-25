@@ -1,45 +1,16 @@
 module GridType
-  module Square
-    include GridType
-    def coordinate_matrix(x, y)
-      [
-         [x-1, y],
-         [x+1, y],
-         [x, y-1],
-         [x, y+1]
-      ]
-    end
-  end
-
-  module Hexagonal
-    include GridType
-    def coordinate_matrix(x, y)
-      i = (x%2 == 0) ? 1 : -1
-      [
-         [x-1, y],
-         [x+1, y],
-         [x, y-1],
-         [x, y+1],
-         [x-1, y+i],
-         [x+1, y+i]
-      ]
-    end
-  end
-
   def find_neighbors(neurons, data_item, radius)
-    founded = {}
+    founded = Hash.new []
     for_found = [data_item]
 
     old = [data_item]
 
     (1..radius).each do |r|
 
-      founded[r] ||= []
-
       for_found.each do |neuron|
         _neighbors = neighbors(neurons, neuron)
         _neighbors -= old
-        old = founded.values.flatten.uniq
+        old |= founded.values.flatten
         founded[r] |= _neighbors
       end
 
@@ -48,19 +19,20 @@ module GridType
     founded
   end
 
-  def convert_to_coordinate(index)
-    x = (index / rows) % cols
-    y = index % rows
+  def convert_to_coordinate index
+    x = (index/rows)%cols
+    y = index%rows
     [x, y]
   end
 
-  def convert_to_index(coordinate)
+  def convert_to_index coordinate
     x, y = coordinate
-    (x*rows + y)
+    x*rows + y
   end
 
-  def correct_coordinate?(coordinate)
-    (0...cols).include? coordinate[0] and (0...rows).include? coordinate[1]
+  def correct_coordinate? coordinate
+    col, row = coordinate
+    (0...cols).include? col and (0...rows).include? row
   end
 
   def neighbors(neurons, data_item)
