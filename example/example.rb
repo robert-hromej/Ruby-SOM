@@ -9,21 +9,21 @@ require './lib/grid/grid_type'
 require './lib/grid'
 require './lib/drawer'
 
-#require './datasets/three_color'
-require './datasets/eight_color'
+require './datasets/three_color'
+#require './datasets/eight_color'
 #require './datasets/iris'
 #require './datasets/cows'
 
 folders = ['output', 'dump']
 folders.each { |folder| Dir.mkdir folder unless Dir.exist? folder }
 
-ceil_size = 10
+ceil_size = 2
 
 attributes = {dimension: DIMENSION,
-              grid: {type: :hexagonal, rows: 40, cols: 40},
+              grid: {type: :hexagonal, rows: 100, cols: 100},
               #grid: {type: :square, rows: 16, cols: 16},
               data: DATA_SET,
-              neighborhood_radius: 30,
+              neighborhood_radius: 60,
               learning_rate: 0.8,
               epochs: 100}
 
@@ -39,8 +39,14 @@ else
   som.save
 end
 
-file_names = som.history.map do |iteration, neurons|
-  if iteration == som.epochs-1 or iteration%3 == 0
+require 'benchmark'
+
+p "start"
+
+puts Benchmark.realtime {
+  file_names = som.history.map do |iteration, neurons|
+    p iteration
+    if iteration == som.epochs-1 or iteration%10 == 0
     som.neurons = Marshal.load(neurons)
     som.current_iteration = iteration
     Drawer.new(width: som.grid.cols*ceil_size,
@@ -49,10 +55,12 @@ file_names = som.history.map do |iteration, neurons|
     #Drawer.new(width: som.grid.cols*54*2 + 54,
     #           height: som.grid.rows*93.8 + 93.8,
     #           som: som).save
+    end
   end
-end
+}
 
-Drawer.create_animation(som.file_name, file_names.compact)
+
+#Drawer.create_animation(som.file_name, file_names.compact)
 
 #drawer = Drawer.new(:width => som.grid.cols*ceil_size, :height => som.grid.rows*ceil_size, :som => som)
 #drawer.save
