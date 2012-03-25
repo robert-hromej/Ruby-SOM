@@ -48,7 +48,7 @@ puts Benchmark.realtime {
     if iteration == som.epochs-1 or iteration%step == 0
       som.neurons = Marshal.load(neurons)
       som.current_iteration = iteration
-      Drawer.new(som: som, type: :rmagick).draw
+      Drawer.new(som: som, type: :chunky).draw
     end
   end
 }

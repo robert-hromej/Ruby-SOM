@@ -11,16 +11,16 @@ class Drawer
   def file_name
     dir = "output/#{som.file_name}"
     Dir.mkdir dir unless Dir.exist? dir
-    "#{dir}/iteration_#{som.current_iteration}.gif"
+    "#{dir}/iteration_#{som.current_iteration}.#{format}"
   end
 
-  def self.create_animation dir, file_names
-    animated = ImageList.new *file_names
-    animated.delay = 100 / 5
-    animated.ticks_per_second = 100 / 5
-    animated.iterations = 1000
-    animated.write("output/#{dir}/animated.gif")
-  end
+  #def self.create_animation dir, file_names
+  #  animated = ImageList.new *file_names
+  #  animated.delay = 100 / 5
+  #  animated.ticks_per_second = 100 / 5
+  #  animated.iterations = 1000
+  #  animated.write("output/#{dir}/animated.gif")
+  #end
 
   def draw
     draw_ceils
@@ -36,7 +36,8 @@ class Drawer
       canvas = Magick::Image.new som.grid.width, som.grid.height
       drawer.draw(canvas)
       canvas.write file_name
-    when :other
+    when :chunky
+      drawer.save file_name, :interlace => true, :compression => Zlib::NO_COMPRESSION
     end
   end
 
@@ -44,8 +45,8 @@ class Drawer
     return @drawer if @drawer
 
     @drawer = case type
-              when :rmagick then  rmagick_drawer
-              #when :rmagick then rmagick_drawer
+              when :rmagick then rmagick_drawer
+              when :chunky then chunky_drawer
               else raise "unknown type '#{type}'"
               end
   end
@@ -82,56 +83,34 @@ class Drawer
     #draw.fill color
 
     color = 256 - weight*256
-    drawer.fill Color::RGB.new(color, color, color).html
+    color = Color::RGB.new(color, color, color).html
 
     coordinates = som.grid.ceil_polygon col, row
-    drawer.polygon *coordinates
+
+    case type
+    when :rmagick
+      drawer.fill color
+      drawer.polygon *coordinates
+    when :chunky
+      drawer.polygon coordinates.flatten, 0, color
+    end
   end
-
-  #def draw_neurons_square
-  #  rows = som.grid.rows
-  #  cols = som.grid.cols
-  #
-  #  raise "incorrect ceil size" unless width.to_f/cols == height.to_f/rows
-  #
-  #  scale = height.to_f/rows
-  #
-  #  max_distance = 0
-  #  min_distance = 0
-  #
-  #  som.neurons.each do |neuron|
-  #    distance = som.distance_with_neighbors neuron
-  #    max_distance = distance if distance > max_distance
-  #    min_distance = distance if distance < min_distance
-  #  end
-  #
-  #  rows.times do |row|
-  #    cols.times do |col|
-  #      index = som.grid.convert_to_index [col, row]
-  #      neuron = som.neurons[index]
-  #
-  #      distance = som.distance_with_neighbors neuron
-  #
-  #      weight = (distance - min_distance) / (max_distance - min_distance)
-  #
-  #      #a = (1..3).to_a.map{ |i| neuron.weights[i]*256 }
-  #      #color = a.map{|c| (c == a.max) ? (256 - c*weight) : 0 }
-  #      #draw.fill  Color::RGB.new(*color).html
-  #
-  #      #p weight
-  #      #color = "##{"%06x" % (0xffffff - weight*0xffffff)}"
-  #      #draw.fill color
-  #
-  #      color = 256 - weight*256
-  #      draw.fill Color::RGB.new(color, color, color).html
-  #    end
-  #  end
-  #end
-
 
   def rmagick_drawer
     require 'RMagick'
     self.extend Magick
     Magick::Draw.new
+  end
+
+  def chunky_drawer
+    require 'chunky_png'
+    ChunkyPNG::Image.new som.grid.width.ceil, som.grid.height.ceil
+  end
+
+  def format
+    case type
+    when :rmagick then 'gif'
+    when :chunky then 'png'
+    end
   end
 end
