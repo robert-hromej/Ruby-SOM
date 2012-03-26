@@ -1,34 +1,23 @@
-require 'normalizer'
 require 'digest/md5'
 
 class SOM
-  attr_accessor :dimension, :neighborhood_radius, :learning_rate, :epochs, :current_iteration
-  attr_reader :grid, :data
+  attr_accessor :neighborhood_radius, :learning_rate, :epochs, :current_iteration
+  attr_reader :grid, :dataset
 
   def initialize(attributes)
-    self.dimension = attributes[:dimension]
     self.grid = attributes[:grid]
-    self.data = attributes[:data]
     self.neighborhood_radius = attributes[:neighborhood_radius]
     self.learning_rate = attributes[:learning_rate]
     self.epochs = attributes[:epochs]
+    self.dataset = attributes[:dataset]
   end
 
-  def data=(_data)
-    @normalized_data = nil
-    @data = _data
+  def dataset=(_dataset)
+    @dataset = _dataset.is_a?(DataSet) ? _dataset : DataSet.new(_dataset)
   end
 
   def history
     @history ||= {}
-  end
-
-  def normalized_data
-    return @normalized_data if @normalized_data
-
-    min, max = Normalizer.find_min_and_max(data)
-    normalizer = Normalizer.new(:min => min, :max => max)
-    @normalized_data = data.map { |n| normalizer.normalize(n) }
   end
 
   def self.load filepath
@@ -42,11 +31,12 @@ class SOM
 
   def self.file_name _som
     if _som.is_a? SOM
-      data_hash = Digest::MD5.hexdigest _som.data.to_s
-      "#{_som.grid}_#{_som.learning_rate}_#{_som.neighborhood_radius}_#{_som.dimension}_#{_som.epochs}_#{data_hash}"
+      data_hash = Digest::MD5.hexdigest _som.dataset.data.to_s
+      "#{_som.grid}_#{_som.learning_rate}_#{_som.neighborhood_radius}_#{_som.dataset.fields.size}_#{_som.epochs}_#{data_hash}"
     else
-      data_hash = Digest::MD5.hexdigest _som[:data].to_s
-      "#{_som[:grid][:type]}_#{_som[:grid][:rows]}_#{_som[:grid][:cols]}_#{_som[:learning_rate]}_#{_som[:neighborhood_radius]}_#{_som[:dimension]}_#{_som[:epochs]}_#{data_hash}"
+      dataset = DataSet.new _som[:dataset]
+      data_hash = Digest::MD5.hexdigest dataset.data.to_s
+      "#{_som[:grid][:type]}_#{_som[:grid][:rows]}_#{_som[:grid][:cols]}_#{_som[:learning_rate]}_#{_som[:neighborhood_radius]}_#{dataset.fields.size}_#{_som[:epochs]}_#{data_hash}"
     end
   end
 
@@ -65,7 +55,7 @@ class SOM
   end
 
   def neurons
-    @neurons ||= Array.new(size).map { Neuron.new(dimension) }
+    @neurons ||= Array.new(size).map { Neuron.new(dataset.fields.size) }
   end
 
   def neurons=(n)
@@ -90,7 +80,7 @@ class SOM
 
     radius = [neighborhood_radius*(1-epoch_rate), 1].max
 
-    normalized_data.each { |data_item| train_data_item(data_item, rate, radius) }
+    dataset.normalized_data.each { |data_item| train_data_item(data_item, rate, radius) }
   end
 
   def train_data_item(data_item, rate, radius)

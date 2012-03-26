@@ -1,25 +1,19 @@
 require "bundler/setup"
-require 'csv'
 
 Dir["./lib/**/*.rb"].each { |file| require file }
 
-dataset = CSV.read 'example/datasets/three_color.csv'
-#dataset = CSV.read './example/datasets/eight_color.csv'
-#dataset = CSV.read './example/datasets/iris.csv'
-#dataset = CSV.read './example/datasets/cows.csv'
-
-data = []
-dataset[1..-1].each { |item| data << item.map { |x| x.to_i } }
+dataset = 'example/datasets/three_color.csv'
+#dataset = 'example/datasets/eight_color.csv'
+#dataset = 'example/datasets/iris.csv'
+#dataset = 'example/datasets/cows.csv'
 
 folders = ['output', 'dump']
 folders.each { |folder| Dir.mkdir folder unless Dir.exist? folder }
 
-grid = {type: :hexagonal, rows: 30, cols: 30, ceil_size: 15}
 #grid = {type: :square, rows: 30, cols: 30, ceil_size: 15}
-
-attributes = {dimension: data[0].size,
-              grid: grid,
-              data: data,
+grid = {type: :hexagonal, rows: 30, cols: 30, ceil_size: 15}
+attributes = {grid: grid,
+              dataset: dataset,
               neighborhood_radius: 17,
               learning_rate: 0.5,
               epochs: 100}
