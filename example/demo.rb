@@ -1,32 +1,28 @@
-#require "bundler"
-#Bundler.require
+require "bundler/setup"
+require 'csv'
 
-require './base/math'
-require './base/array'
+Dir["./lib/**/*.rb"].each { |file| require file }
 
-require './lib/som'
-require './lib/neuron'
-require './lib/grid/hexagonal'
-require './lib/grid/square'
-require './lib/grid/grid_type'
-require './lib/grid'
-require './lib/drawer'
+dataset = CSV.read 'example/datasets/three_color.csv'
+#dataset = CSV.read './example/datasets/eight_color.csv'
+#dataset = CSV.read './example/datasets/iris.csv'
+#dataset = CSV.read './example/datasets/cows.csv'
 
-#require './datasets/three_color'
-require './datasets/eight_color'
-#require './datasets/iris'
-#require './datasets/cows'
+data = []
+dataset[1..-1].each { |item| data << item.map { |x| x.to_i } }
 
 folders = ['output', 'dump']
 folders.each { |folder| Dir.mkdir folder unless Dir.exist? folder }
 
-attributes = {dimension: DIMENSION,
-              grid: {type: :hexagonal, rows: 40, cols: 40, ceil_size: 15},
-              #grid: {type: :square, rows: 30, cols: 30, ceil_size: 7},
-              data: DATA_SET,
-              neighborhood_radius: 15,
-              learning_rate: 0.8,
-              epochs: 250}
+grid = {type: :hexagonal, rows: 30, cols: 30, ceil_size: 15}
+#grid = {type: :square, rows: 30, cols: 30, ceil_size: 15}
+
+attributes = {dimension: data[0].size,
+              grid: grid,
+              data: data,
+              neighborhood_radius: 17,
+              learning_rate: 0.5,
+              epochs: 100}
 
 som_file = SOM.file_name(attributes)
 som_file = "dump/#{som_file}.som"
@@ -46,13 +42,13 @@ p "Start generate images...please wait"
 puts Benchmark.realtime {
   som.history.map do |iteration, neurons|
     puts "iteration: #{iteration}"
-    step = 10
+    step = 1
     if iteration == som.epochs-1 or iteration%step == 0
       som.neurons = Marshal.load(neurons)
       som.current_iteration = iteration
-      #Drawer.new(som: som, type: :rasem).draw
+      Drawer.new(som: som, type: :rasem).draw
       #Drawer.new(som: som, type: :chunky).draw
-      Drawer.new(som: som, type: :rmagick).draw
+      #Drawer.new(som: som, type: :rmagick).draw
     end
   end
 }
