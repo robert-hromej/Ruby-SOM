@@ -1,4 +1,4 @@
-require './som/grid'
+require './lib/grid'
 
 describe Grid do
 

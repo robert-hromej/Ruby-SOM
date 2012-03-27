@@ -1,7 +1,7 @@
 require 'csv'
 require 'normalizer'
 
-class DataSet
+class Dataset
   attr_accessor :file_path
   attr_writer :data
 

@@ -1,5 +1,7 @@
-require './som/grid'
-require './som/grid/grid_type'
+require './lib/grid'
+require './lib/grid/grid_type'
+require './lib/grid/hexagonal'
+require './lib/grid/square'
 
 describe GridType do
 
@@ -7,67 +9,47 @@ describe GridType do
                 4, 5, 6, 7,
                 8, 9, 10, 11] }
 
-  describe "GridType::Square" do
+  describe '' do
+    [:square, :hexagonal].each do |type|
+      let(:grid) { Grid.new({type: type, rows: 4, cols: 3}) }
+      let(:matrix) { {0 => [0, 0], 1 => [0, 1], 2 => [0, 2], 3 => [0, 3], 4 => [1, 0], 5 => [1, 1],
+                      6 => [1, 2], 7 => [1, 3], 8 => [2, 0], 9 => [2, 1], 10 => [2, 2], 11 => [2, 3]} }
 
+      it "convert_to_index method with '#{type}' type" do
+        matrix.each do |index, coordinate|
+          grid.convert_to_index(coordinate).should eq index
+        end
+      end
+
+      it "convert_to_coordinate" do
+        matrix.each do |index, coordinate|
+          grid.convert_to_coordinate(index).should eq coordinate
+        end
+      end
+    end
+  end
+
+  describe "GridType::Square" do
     let(:grid) { Grid.new({type: :square, rows: 4, cols: 3}) }
 
-    it "convert_to_index method" do
-      grid.convert_to_index([0, 0]).should eq 0
-      grid.convert_to_index([1, 0]).should eq 4
-      grid.convert_to_index([1, 1]).should eq 5
-      grid.convert_to_index([1, 3]).should eq 7
-      grid.convert_to_index([2, 0]).should eq 8
-      grid.convert_to_index([2, 3]).should eq 11
+    it "should return neighbors" do
+      {0 => [1, 4], 1 => [0, 5, 2], 2 => [1, 6, 3], 3 => [2, 7], 4 => [0, 5, 8],
+       5 => [1, 6, 9, 4], 6 => [2, 5, 10, 7], 7 => [3, 6, 11], 8 => [4, 9], 9 => [5, 8, 10],
+       10 => [9, 6, 11], 11 => [7, 10], }.each do |index, neighbors|
+        grid.neighbors(index).should =~ neighbors
+      end
     end
+  end
 
-    it "convert_to_coordinate" do
-      grid.convert_to_coordinate(0).should eq [0, 0]
-      grid.convert_to_coordinate(1).should eq [0, 1]
-      grid.convert_to_coordinate(2).should eq [0, 2]
-      grid.convert_to_coordinate(3).should eq [0, 3]
-      grid.convert_to_coordinate(4).should eq [1, 0]
-      grid.convert_to_coordinate(5).should eq [1, 1]
-      grid.convert_to_coordinate(6).should eq [1, 2]
-      grid.convert_to_coordinate(7).should eq [1, 3]
-      grid.convert_to_coordinate(8).should eq [2, 0]
-      grid.convert_to_coordinate(9).should eq [2, 1]
-      grid.convert_to_coordinate(10).should eq [2, 2]
-      grid.convert_to_coordinate(11).should eq [2, 3]
-    end
+  describe "GridType::Hexagonal" do
+    let(:grid) { Grid.new({type: :hexagonal, rows: 4, cols: 3}) }
 
     it "should return neighbors" do
-      grid.neighbors(data, 0).should =~ [1, 4]
-      grid.neighbors(data, 1).should =~ [0, 5, 2]
-      grid.neighbors(data, 3).should =~ [2, 7]
-      grid.neighbors(data, 4).should =~ [0, 5, 8]
-      grid.neighbors(data, 5).should =~ [1, 6, 9, 4]
-      grid.neighbors(data, 7).should =~ [3, 6, 11]
-      grid.neighbors(data, 8).should =~ [4, 9]
-      grid.neighbors(data, 9).should =~ [5, 8, 10]
-      grid.neighbors(data, 11).should =~ [7, 10]
-    end
-
-    it "should return neighbors with radius=2" do
-      grid.find_neighbors(data, 0, 2).values.flatten.should =~ [1, 4, 2, 5, 8]
-      grid.find_neighbors(data, 1, 2).values.flatten.should =~ [0, 5, 2, 3, 4, 6, 9]
-      grid.find_neighbors(data, 3, 2).values.flatten.should =~ [2, 7, 1, 6, 11]
-      grid.find_neighbors(data, 4, 2).values.flatten.should =~ [0, 5, 8, 1, 6, 9]
-      grid.find_neighbors(data, 5, 2).values.flatten.should =~ [1, 6, 9, 4, 0, 2, 7, 8, 10]
-      grid.find_neighbors(data, 7, 2).values.flatten.should =~ [3, 6, 11, 2, 5, 10]
-      grid.find_neighbors(data, 8, 2).values.flatten.should =~ [4, 9, 0, 5, 10]
-      grid.find_neighbors(data, 9, 2).values.flatten.should =~ [5, 8, 10, 1, 4, 6, 11]
-      grid.find_neighbors(data, 11, 2).values.flatten.should =~ [7, 10, 3, 6, 9]
+      {0 => [1, 4, 5], 1 => [0, 5, 6, 2], 2 => [1, 3, 6, 7], 3 => [2, 7], 4 => [0, 5, 8],
+       5 => [1, 6, 9, 0, 4, 8], 6 => [2, 7, 10, 1, 5, 9], 7 => [2, 3, 6, 10, 11],
+       8 => [4, 5, 9], 9 => [8, 5, 6, 10], 10 => [9, 6, 7, 11], 11 => [10, 7]}.each do |index, neighbors|
+        grid.neighbors(index).should =~ neighbors
+      end
     end
   end
-
-  describe "GridType::Line" do
-    let(:grid) { Grid.new({type: :line, rows: 4, cols: 3}) }
-
-    it "should return neighbors with radius=1" do
-      grid.neighbors(data, 0, 1).should =~ [1]
-      grid.neighbors(data, 5, 1).should =~ [4, 6]
-      grid.neighbors(data, 11, 1).should =~ [10]
-    end
-  end
-
 end

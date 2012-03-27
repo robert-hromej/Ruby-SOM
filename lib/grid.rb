@@ -1,6 +1,7 @@
 require 'digest/md5'
 require './lib/grid/grid_type'
 
+# TODO need test
 class Grid
   attr_accessor :type, :rows, :cols, :ceil_size
   include GridType

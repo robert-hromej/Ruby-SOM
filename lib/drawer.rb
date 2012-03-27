@@ -1,5 +1,6 @@
 require 'color'
 
+# TODO need test
 class Drawer
   attr_accessor :som, :width, :height, :type
 

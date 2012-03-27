@@ -14,7 +14,7 @@ class SOM
   end
 
   def dataset=(_dataset)
-    @dataset = _dataset.is_a?(DataSet) ? _dataset : DataSet.new(_dataset)
+    @dataset = _dataset.is_a?(Dataset) ? _dataset : Dataset.new(_dataset)
   end
 
   def history
@@ -35,7 +35,7 @@ class SOM
       data_hash = Digest::MD5.hexdigest _som.dataset.data.to_s
       "#{_som.grid}_#{_som.learning_rate}_#{_som.neighborhood_radius}_#{_som.dataset.fields.size}_#{_som.epochs}_#{data_hash}"
     else
-      dataset = DataSet.new _som[:dataset]
+      dataset = Dataset.new _som[:dataset]
       data_hash = Digest::MD5.hexdigest dataset.data.to_s
       "#{_som[:grid][:type]}_#{_som[:grid][:rows]}_#{_som[:grid][:cols]}_#{_som[:learning_rate]}_#{_som[:neighborhood_radius]}_#{dataset.fields.size}_#{_som[:epochs]}_#{data_hash}"
     end
@@ -67,8 +67,8 @@ class SOM
     @neurons
   end
 
-  def neurons=(n)
-    @neurons = n
+  def neurons=(_neurons)
+    @neurons = _neurons
   end
 
   def run_train
@@ -80,7 +80,7 @@ class SOM
     end
   end
 
-  def train_epoch(epoch_rate)
+  def train_epoch epoch_rate
     puts epoch_rate
     rate = learning_rate * (1 - epoch_rate)
 

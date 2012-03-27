@@ -7,6 +7,6 @@ gem 'rmagick'
 gem 'chunky_png'
 gem 'rasem'
 
-#gem 'rspec'
+gem 'rspec'
 
 
