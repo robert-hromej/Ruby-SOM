@@ -1,4 +1,5 @@
 require 'digest/md5'
+#require 'benchmark'
 
 class SOM
   attr_accessor :neighborhood_radius, :learning_rate, :epochs, :current_iteration
@@ -55,7 +56,15 @@ class SOM
   end
 
   def neurons
+    return @neurons if @neurons
+
     @neurons ||= Array.new(size).map { Neuron.new(dataset.fields.size) }
+    size.times do |index|
+      neuron = @neurons[index]
+      neighbors_index = grid.neighbors index
+      neighbors_index.each { |neighbor_index| neuron.neighbors = @neurons[neighbor_index] }
+    end
+    @neurons
   end
 
   def neurons=(n)
@@ -79,35 +88,28 @@ class SOM
     #d_diff = (d - 1.0) / (n * 0.65)
 
     radius = [neighborhood_radius*(1-epoch_rate), 1].max
-
     dataset.normalized_data.each { |data_item| train_data_item(data_item, rate, radius) }
   end
 
   def train_data_item(data_item, rate, radius)
     neurons.each { |neuron| neuron.reset_updated_status }
+    neurons.each { |n| n.reset_founded_status }
+
+    rate_scale = radius.to_f + 1.0
 
     neuron = closest(data_item)
-    neuron.update!(data_item, rate)
 
-    all_neighbors = neighbors(neuron, radius)
-
-    all_neighbors.each do |_, neighbors|
-      rate -= rate / (all_neighbors.size.to_f + 1.0)
-      neighbors.each do |index|
-        neighbor = neurons[index]
-        neighbor.update!(data_item, rate)
+    neighbors = neuron.neighbors_by_radius radius
+    neighbors.each do |ns|
+      rate -= rate / rate_scale
+      ns.each do |n|
+        n.update!(data_item, rate)
       end
     end
   end
 
-  def neighbors neuron, radius = nil
-    radius ||= neighborhood_radius
-    grid.find_neighbors(neurons, neuron, radius.to_i)
-  end
-
   def distance_with_neighbors neuron
-    neighbors = neighbors neuron, 1
-    neighbors[1].map { |i| neuron.distance neurons[i] }.sum
+    neuron.neighbors.map { |n| neuron.distance n }.sum
   end
 
   def find_neuron_by_coordinate coordinate

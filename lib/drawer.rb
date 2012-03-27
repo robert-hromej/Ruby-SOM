@@ -79,17 +79,16 @@ class Drawer
     color = 256 - weight*256
     color = Color::RGB.new(color, color, color).html
 
-    coordinates = som.grid.ceil_polygon col, row
+    polygon = som.grid.polygon_points col, row
 
     case type
     when :rmagick
       drawer.fill color
-      drawer.polygon *coordinates
+      drawer.polygon *polygon
     when :chunky
-      drawer.polygon coordinates.flatten, 0, color
+      drawer.polygon polygon.flatten, 0, color
     when :rasem
-      coordinates << {fill: color}
-      drawer.polygon *coordinates
+      drawer.polygon *(polygon << {fill: color})
     end
   end
 

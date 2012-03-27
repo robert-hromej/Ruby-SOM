@@ -12,7 +12,7 @@ module GridType
       ceil_size * rows
     end
 
-    def ceil_polygon col, row
+    def polygon_points col, row
       x, y = [col*ceil_size, row*ceil_size]
       [[x, y], [x+ceil_size, y], [x+ceil_size, y+ceil_size], [x, y+ceil_size],]
     end

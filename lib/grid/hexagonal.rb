@@ -15,7 +15,7 @@ module GridType
       ceil_size*(1.5*rows + 0.5)
     end
 
-    def ceil_polygon col, row
+    def polygon_points col, row
       w = 2 * ceil_size * SCALE
       h = 1.5 * ceil_size
 
