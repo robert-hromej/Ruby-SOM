@@ -19,12 +19,6 @@ class Grid
     rows * cols
   end
 
-  def draw(gc, data, width, height)
-    draw_grid(gc, width-100, height-100)
-
-    draw_ceils(gc, data, width-100, height-100)
-  end
-
   def to_s
     "#{type}_#{rows}_#{cols}"
   end

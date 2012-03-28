@@ -38,15 +38,15 @@ describe Neuron do
 
     it 'neighbors_by_radius' do
       {@n1 => {
-         1 => [[@n2, @n3, @n4]],
-         2 => [[@n2, @n3, @n4], [@n5]],
-         3 => [[@n2, @n3, @n4], [@n5], [@n6]]},
+        1 => [[@n2, @n3, @n4]],
+        2 => [[@n2, @n3, @n4], [@n5]],
+        3 => [[@n2, @n3, @n4], [@n5], [@n6]]},
        @n4 => {
-          1 => [[@n1, @n2]],
-          2 => [[@n1, @n2], [@n3, @n5]],
-          3 => [[@n1, @n2], [@n3, @n5], [@n6]],
-          4 => [[@n1, @n2], [@n3, @n5], [@n6]],
-          100 => [[@n1, @n2], [@n3, @n5], [@n6]]}}.each do |neuron, hash|
+         1 => [[@n1, @n2]],
+         2 => [[@n1, @n2], [@n3, @n5]],
+         3 => [[@n1, @n2], [@n3, @n5], [@n6]],
+         4 => [[@n1, @n2], [@n3, @n5], [@n6]],
+         100 => [[@n1, @n2], [@n3, @n5], [@n6]]}}.each do |neuron, hash|
         hash.each do |radius, neighbors|
           neurons.each { |n| n.reset_founded_status }
           neuron.neighbors_by_radius(radius).should eq neighbors

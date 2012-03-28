@@ -2,20 +2,20 @@ require "bundler/setup"
 
 Dir["./lib/**/*.rb"].each { |file| require file }
 
-dataset = 'example/datasets/three_color.csv'
+#dataset = 'example/datasets/three_color.csv'
 #dataset = 'example/datasets/eight_color.csv'
-#dataset = 'example/datasets/iris.csv'
+dataset = 'example/datasets/iris.csv'
 #dataset = 'example/datasets/cows.csv'
 
 folders = ['output', 'dump']
 folders.each { |folder| Dir.mkdir folder unless Dir.exist? folder }
 
 #grid = {type: :square, rows: 30, cols: 30, ceil_size: 15}
-grid = {type: :hexagonal, rows: 30, cols: 30, ceil_size: 15}
+grid = {type: :hexagonal, rows: 15, cols: 15, ceil_size: 15}
 attributes = {grid: grid,
               dataset: dataset,
-              neighborhood_radius: 17,
-              learning_rate: 0.5,
+              neighborhood_radius: 10,
+              learning_rate: 0.005,
               epochs: 100}
 
 som_file = SOM.file_name(attributes)
@@ -46,20 +46,3 @@ puts Benchmark.realtime {
     end
   end
 }
-
-#Drawer.create_animation(som.file_name, file_names.compact)
-
-#require 'scruffy'
-#
-#graph = Scruffy::Graph.new
-#graph.title = "Sample Line Graph"
-#graph.renderer = Scruffy::Renderers::Standard.new
-#
-#graph.add :line, 'Example', [20, 100, 70, 30, 106]
-#
-#graph.render :to => "line_test.svg"
-
-#ceil_size = 5
-#drawer = Drawer.new(width: som.grid.cols*ceil_size, height: som.grid.rows*ceil_size, som: som)
-#drawer.save 'output/img.gif'
-

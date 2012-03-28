@@ -32,7 +32,7 @@ class Neuron
 
       for_found = result.last
     end
-    result.delete_if{|x| x == []}
+    result.delete_if { |x| x == [] }
     result
   end
 
