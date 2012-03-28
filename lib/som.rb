@@ -2,10 +2,10 @@ require 'digest/md5'
 #require 'benchmark'
 
 class SOM
-  attr_accessor :neighborhood_radius, :learning_rate, :epochs, :current_iteration
+  attr_accessor :neighborhood_radius, :learning_rate, :epochs, :current_iteration, :progressbar, :canvas
   attr_reader :grid, :dataset
 
-  def initialize(attributes)
+  def initialize(attributes = {})
     self.grid = attributes[:grid]
     self.neighborhood_radius = attributes[:neighborhood_radius]
     self.learning_rate = attributes[:learning_rate]
@@ -18,7 +18,7 @@ class SOM
   end
 
   def history
-    @history ||= {}
+    @history ||= []
   end
 
   def self.load filepath
@@ -72,15 +72,26 @@ class SOM
   end
 
   def run_train
+    reset
     epochs.times do |epoch|
       @current_iteration = epoch
       train_epoch epoch.to_f/epochs
 
-      history[epoch] = Marshal.dump(self.neurons)
+      history << self.result
     end
   end
 
+  def result
+    neurons.map { |neuron| neuron.weights.clone }
+  end
+
+  def reset
+    @neurons = nil
+  end
+
   def train_epoch epoch_rate
+    progressbar.value = epoch_rate*100 if progressbar
+
     puts epoch_rate
     rate = learning_rate * (1 - epoch_rate)
 
@@ -130,5 +141,9 @@ class SOM
       end
     end
     closest
+  rescue => ex
+    puts ex.message
+    puts ex.backtrace
+    p data_item
   end
 end

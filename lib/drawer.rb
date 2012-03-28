@@ -3,7 +3,7 @@ require 'color'
 class Drawer
   attr_accessor :som, :width, :height, :type
 
-  def initialize attributes
+  def initialize attributes = {}
     self.som = attributes[:som]
     self.type = attributes[:type]
   end
@@ -43,43 +43,29 @@ class Drawer
               when :rmagick then rmagick_drawer
               when :chunky then chunky_drawer
               when :rasem then rasem_drawer
+              when :canvas then som.canvas
               else raise "unknown type '#{type}'"
               end
   end
 
   def draw_ceils
-    max_distance = 0
-    min_distance = 0
-
-    som.neurons.each do |neuron|
-      distance = som.distance_with_neighbors neuron
-      max_distance = distance if distance > max_distance
-      min_distance = distance if distance < min_distance
-    end
-
-    som.grid.rows.times do |row|
-      som.grid.cols.times do |col|
-        neuron = som.find_neuron_by_coordinate [col, row]
-        distance = som.distance_with_neighbors neuron
-        weight = (distance - min_distance) / (max_distance - min_distance)
-        draw_ceil col, row, weight, neuron
-      end
+    normalized_distances.each_with_index do |distance, index|
+      col, row = som.grid.convert_to_coordinate index
+      polygon = create_polygon(col, row, distance)
+      draw_polygon polygon
     end
   end
 
-  def draw_ceil col, row, weight, neuron = nil
-    #a = (0..2).to_a.map{ |i| neuron.weights[i]*256 }
-    #color = a.map{|c| (c == a.max) ? (256 - c*weight) : 0 }
-    #color = Color::RGB.new(*color).html
-
-    #p weight
-    #color = "##{"%06x" % (0xffffff - weight*0xffffff)}"
-    #draw.fill color
-
+  def create_polygon(col, row, weight)
     color = 256 - weight*256
     color = Color::RGB.new(color, color, color).html
 
     polygon = som.grid.polygon_points col, row
+    polygon << color
+  end
+
+  def draw_polygon polygon
+    color = polygon.pop
 
     case type
     when :rmagick
@@ -89,7 +75,15 @@ class Drawer
       drawer.polygon polygon.flatten, 0, color
     when :rasem
       drawer.polygon *(polygon << {fill: color})
+    when :canvas
+      TkcPolygon.new(drawer, *polygon, 'fill' => color)
     end
+  end
+
+  def normalized_distances
+    distances = som.neurons.map { |neuron| som.distance_with_neighbors neuron }
+    min, max = distances.min, distances.max
+    distances.map! { |distance| (distance - min) / (max - min) }
   end
 
   def rmagick_drawer
