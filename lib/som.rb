@@ -75,7 +75,7 @@ class SOM
     reset
     epochs.times do |epoch|
       @current_iteration = epoch
-      train_epoch epoch.to_f/epochs
+      train_epoch (epoch+1)/epochs.to_f
 
       history << self.result
     end

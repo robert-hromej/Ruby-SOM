@@ -20,6 +20,15 @@ class Drawer
     file_name
   end
 
+  def colors
+    cls = []
+    normalized_distances.each do |distance|
+      color = 256 - distance*256
+      cls << Color::RGB.new(color, color, color).html
+    end
+    cls
+  end
+
   private
 
   def save_to_file file_name
@@ -76,7 +85,11 @@ class Drawer
     when :rasem
       drawer.polygon *(polygon << {fill: color})
     when :canvas
-      TkcPolygon.new(drawer, *polygon, 'fill' => color)
+      polygon = TkcPolygon.new(drawer, *polygon, fill: color, tags: 'aaa bbb')
+      p polygon.id
+      p polygon.tags
+      polygon.tags = 'zzz qqq'
+      p polygon.tags
     end
   end
 
