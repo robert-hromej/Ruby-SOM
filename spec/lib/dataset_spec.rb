@@ -1,4 +1,4 @@
-require './lib/dataset'
+require './spec/spec_helper'
 
 describe Dataset do
   subject { Dataset.new './spec/datasets/eight_color.csv' }

@@ -30,7 +30,7 @@ class SOM
   def run_train
     prog_bar = ProgressBar.new("Training", epochs)
 
-    (0..epochs).each do |epoch|
+    epochs.times do |epoch|
       prog_bar.inc
       train_epoch epoch
     end
@@ -60,12 +60,12 @@ class SOM
     rate_scale = radius + 1.0
 
     closest_neuron = closest(data_item)
-    closest_neuron.update!(data_item, rate)
 
     neighbors = closest_neuron.neighbors_by_radius radius
+
     neighbors.each do |ns|
-      rate -= rate / rate_scale
       ns.each { |neuron| neuron.update!(data_item, rate) }
+      rate -= rate / rate_scale
     end
   end
 
@@ -81,11 +81,11 @@ class SOM
   end
 
   def closest(data_item)
-    distances = @neurons.map { |neuron| Math.euclidean_distance(data_item, neuron.weights) }
+    distances = neurons.map { |neuron| Math.euclidean_distance(data_item, neuron.weights) }
 
     min = distances.min
     index = distances.index(min)
 
-    @neurons[index]
+    neurons[index]
   end
 end

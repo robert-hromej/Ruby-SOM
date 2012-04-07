@@ -7,3 +7,5 @@ gem 'rmagick'
 
 gem 'rspec'
 gem 'progressbar'
+
+gem 'simplecov', :require => false#, :group => :test

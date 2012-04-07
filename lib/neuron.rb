@@ -18,27 +18,23 @@ class Neuron
   end
 
   def distance_with_neighbors
-    neighbors.map { |neighbor| self.distance neighbor }.sum
+    neighbors.map { |neighbor| distance neighbor }.sum
   end
 
   def neighbors_by_radius radius
-    self.founded!
-
-    result = []
-
-    for_found = [self]
+    result = [[self]]
 
     (1..radius).each do
-      result << []
+      sub_result = []
 
-      for_found.each do |r|
-        r.neighbors.to_a.find_all { |x| !x.founded? }.each do |neuron|
-          result.last << neuron
-          neuron.founded!
-        end
+      result.last.each do |neuron|
+        neuron.founded!
+        filtered_neighbors = neuron.neighbors.find_all { |x| !x.founded? }
+        filtered_neighbors.each { |neighbor| sub_result << neighbor }
+        filtered_neighbors.each { |neighbor| neighbor.founded! }
       end
 
-      for_found = result.last
+      result << sub_result
     end
     result.delete_if { |x| x == [] }
     result
@@ -50,21 +46,15 @@ class Neuron
 
   def update! data_item, rate
     return if updated?
-    raise "@weights.size != n.w.size" unless weights.size == data_item.size
 
     dimension.times { |i| weights[i] += rate * (data_item[i] - weights[i]) }
-    self
-  end
-
-  def average_weight
-    weights.sum / weights.size
   end
 
   def distance other_neuron
     Math.euclidean_distance weights, other_neuron.weights
   end
 
-  def inspect
+  def to_s
     "Neuron[#{weights.join(',')}]"
   end
 end

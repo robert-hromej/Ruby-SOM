@@ -1,20 +1,18 @@
-require './lib/grid'
+require './spec/spec_helper'
 
 describe Grid do
 
-  let(:attributes) { {type: :square, rows: 3, cols: 4} }
-
-  subject { Grid.new attributes }
+  subject { Grid.new(rows: 3, cols: 4, ceil_size: 15) }
 
   it "should be correct variables" do
-    subject.type.should eq :square
     subject.rows.should eq 3
     subject.cols.should eq 4
+    subject.ceil_size.should eq 15
+    subject.size.should eq 12
   end
 
   it "neighbors method" do
     #subject.
     pending
   end
-
 end
