@@ -2,7 +2,7 @@ require './spec/spec_helper'
 
 describe Grid do
 
-  subject { Grid.new(rows: 3, cols: 4, ceil_size: 15) }
+  subject { Grid.new(:rows => 3, :cols => 4, :ceil_size => 15) }
 
   it "should be correct variables" do
     subject.rows.should eq 3

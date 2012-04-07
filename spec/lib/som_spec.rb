@@ -2,7 +2,7 @@ require './spec/spec_helper'
 
 describe SOM do
 
-  let(:grid) { Grid.new(rows: 30, cols: 30, ceil_size: 15) }
+  let(:grid) { Grid.new(:rows => 30, :cols => 30, :ceil_size => 15) }
 
   let(:dataset) { './spec/datasets/eight_color.csv' }
 

@@ -17,11 +17,11 @@ some_file_path = "dump/#{file_name}.som"
 if File.exist? some_file_path
   som = SomManager.open some_file_path
 else
-  grid = {type: :hexagonal, rows: 50, cols: 50, ceil_size: 15}
-  attributes = {grid: grid, dataset: dataset_file_path,
-                neighborhood_radius: 30,
-                learning_rate: 0.3,
-                epochs: 100}
+  grid = {:type => :hexagonal, :rows => 50, :cols => 50, :ceil_size => 15}
+  attributes = {:grid => grid, :dataset => dataset_file_path,
+                :neighborhood_radius => 30,
+                :learning_rate => 0.3,
+                :epochs => 100}
 
   som = SOM.new attributes
   som.run_train

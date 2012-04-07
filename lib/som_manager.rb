@@ -18,17 +18,17 @@ class SomManager
     def dump object
       result = {}
       if object.is_a? SOM
-        result = {neighborhood_radius: object.neighborhood_radius,
-                  learning_rate: object.learning_rate,
-                  epochs: object.epochs,
-                  dataset: object.dataset,
-                  grid: object.grid,
-                  neurons: object.neurons.map { |neuron| dump(neuron) }
+        result = {:neighborhood_radius => object.neighborhood_radius,
+                  :learning_rate => object.learning_rate,
+                  :epochs => object.epochs,
+                  :dataset => object.dataset,
+                  :grid => object.grid,
+                  :neurons => object.neurons.map { |neuron| dump(neuron) }
         }
       end
 
       if object.is_a? Neuron
-        result = {weights: object.weights}
+        result = {:weights => object.weights}
       end
       result
     end

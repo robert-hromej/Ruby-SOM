@@ -35,15 +35,15 @@ describe Neuron do
 
     it 'neighbors_by_radius' do
       {@n1 => {
-         1 => [[@n1], [@n2, @n3, @n4]],
-         2 => [[@n1], [@n2, @n3, @n4], [@n5]],
-         3 => [[@n1], [@n2, @n3, @n4], [@n5], [@n6]]},
+        1 => [[@n1], [@n2, @n3, @n4]],
+        2 => [[@n1], [@n2, @n3, @n4], [@n5]],
+        3 => [[@n1], [@n2, @n3, @n4], [@n5], [@n6]]},
        @n4 => {
-          1 => [[@n4], [@n1, @n2]],
-          2 => [[@n4], [@n1, @n2], [@n3, @n5]],
-          3 => [[@n4], [@n1, @n2], [@n3, @n5], [@n6]],
-          4 => [[@n4], [@n1, @n2], [@n3, @n5], [@n6]],
-          100 => [[@n4], [@n1, @n2], [@n3, @n5], [@n6]]}}.each do |neuron, hash|
+         1 => [[@n4], [@n1, @n2]],
+         2 => [[@n4], [@n1, @n2], [@n3, @n5]],
+         3 => [[@n4], [@n1, @n2], [@n3, @n5], [@n6]],
+         4 => [[@n4], [@n1, @n2], [@n3, @n5], [@n6]],
+         100 => [[@n4], [@n1, @n2], [@n3, @n5], [@n6]]}}.each do |neuron, hash|
         hash.each do |radius, neighbors|
           neurons.each { |n| n.not_founded! }
           neuron.neighbors_by_radius(radius).should eq neighbors

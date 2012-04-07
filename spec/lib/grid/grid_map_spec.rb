@@ -2,7 +2,7 @@ require './spec/spec_helper'
 
 describe GridMap do
 
-  subject { Grid.new(rows: 4, cols: 3, ceil_size: 15) }
+  subject { Grid.new(:rows => 4, :cols => 3, :ceil_size => 15) }
 
   describe 'both' do
     let(:matrix) { {0 => [0, 0], 1 => [0, 1], 2 => [0, 2], 3 => [0, 3],
