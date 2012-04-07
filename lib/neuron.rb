@@ -47,7 +47,7 @@ class Neuron
   def update! data_item, rate
     return if updated?
 
-    dimension.times { |i| weights[i] += rate * (data_item[i] - weights[i]) }
+    self.weights = Math.update_weights(self.weights, data_item, rate)
   end
 
   def distance other_neuron

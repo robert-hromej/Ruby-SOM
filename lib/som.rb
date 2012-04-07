@@ -1,6 +1,8 @@
 require 'progressbar'
 
 require './lib/drawer'
+#
+require 'benchmark'
 
 class SOM
   include Drawer
@@ -64,7 +66,9 @@ class SOM
     neighbors = closest_neuron.neighbors_by_radius radius
 
     neighbors.each do |ns|
-      ns.each { |neuron| neuron.update!(data_item, rate) }
+      ns.each do |neuron|
+        neuron.update!(data_item, rate)
+      end
       rate -= rate / rate_scale
     end
   end
@@ -81,11 +85,8 @@ class SOM
   end
 
   def closest(data_item)
-    distances = neurons.map { |neuron| Math.euclidean_distance(data_item, neuron.weights) }
-
-    min = distances.min
-    index = distances.index(min)
-
+    weights = neurons.map { |neuron| neuron.weights }
+    index = Math.closest(weights, data_item)
     neurons[index]
   end
 end
