@@ -1,4 +1,6 @@
 .idea
 .output
+coverage
+spec/tmp
 dump
 output
