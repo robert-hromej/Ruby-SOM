@@ -1,32 +1,40 @@
+require './lib/support/status_attr'
+
 class Neuron
   attr_accessor :dimension
   attr_writer :weights
+  status_attr :updated, :founded
 
-  def initialize(dimension)
+  def initialize dimension
     self.dimension = dimension
   end
 
   def neighbors
-    @neighbors ||= Set.new
+    @neighbors ||= []
   end
 
   def neighbors=(neurons)
-    Array(neurons).each do |neuron|
-      neighbors.add neuron
-    end
+    @neighbors = Array(neurons)
+  end
+
+  def distance_with_neighbors
+    neighbors.map { |neighbor| self.distance neighbor }.sum
   end
 
   def neighbors_by_radius radius
-    self.already_founded!
+    self.founded!
+
     result = []
+
     for_found = [self]
+
     (1..radius).each do
       result << []
 
       for_found.each do |r|
-        r.neighbors.to_a.find_all { |x| !x.already_founded? }.each do |neuron|
+        r.neighbors.to_a.find_all { |x| !x.founded? }.each do |neuron|
           result.last << neuron
-          neuron.already_founded!
+          neuron.founded!
         end
       end
 
@@ -41,27 +49,11 @@ class Neuron
   end
 
   def update! data_item, rate
-    return if already_updated?
+    return if updated?
     raise "@weights.size != n.w.size" unless weights.size == data_item.size
 
     dimension.times { |i| weights[i] += rate * (data_item[i] - weights[i]) }
     self
-  end
-
-  def reset_updated_status
-    @already_updated = false
-  end
-
-  def reset_founded_status
-    @already_founded = false
-  end
-
-  def already_founded!
-    @already_founded = true
-  end
-
-  def already_founded?
-    !!@already_founded
   end
 
   def average_weight
@@ -74,15 +66,5 @@ class Neuron
 
   def inspect
     "Neuron[#{weights.join(',')}]"
-  end
-
-  private
-
-  def already_updated?
-    !!@already_updated
-  end
-
-  def already_updated!
-    @already_updated = true
   end
 end

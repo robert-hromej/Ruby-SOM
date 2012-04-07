@@ -1,125 +1,85 @@
+require 'RMagick'
 require 'color'
 
-class Drawer
-  attr_accessor :som, :width, :height, :type
+module Drawer
+  attr_accessor :output_directory
 
-  def initialize attributes = {}
-    self.som = attributes[:som]
-    self.type = attributes[:type]
-  end
+  def draw output_directory
+    prog_bar = ProgressBar.new("Drawing images", dataset.fields.size + 1)
 
-  def file_name
-    dir = "output/#{som.file_name}"
-    Dir.mkdir dir unless Dir.exist? dir
-    "#{dir}/iteration_#{som.current_iteration}.#{format}"
-  end
+    self.output_directory = output_directory
 
-  def draw
-    draw_ceils
-    save_to_file file_name
-    file_name
-  end
+    draw_unified_distances
+    prog_bar.inc
 
-  def colors
-    cls = []
-    normalized_distances.each do |distance|
-      color = 256 - distance*256
-      cls << Color::RGB.new(color, color, color).html
+    dataset.fields.each_index do |index|
+      prog_bar.inc
+      draw_properties index
     end
-    cls
+
+    prog_bar.finish
+  end
+
+  def draw_unified_distances
+    normalized_distances.each_with_index do |distance, index|
+      fill distance, :rgb
+      draw_polygon index
+    end
+
+    save_to_file file_path('unified')
+  end
+
+  def draw_properties property_index
+    properties = normalized_properties.map { |property| property[property_index] }
+
+    properties.each_with_index do |weight, index|
+      fill weight, :hsl
+      draw_polygon index
+    end
+
+    save_to_file file_path("property_#{property_index}")
   end
 
   private
 
-  def save_to_file file_name
-    case type
-    when :rmagick
-      canvas = Magick::Image.new som.grid.width, som.grid.height
-      drawer.draw(canvas)
-      canvas.write file_name
-    when :chunky
-      drawer.save file_name, :interlace => true, :compression => Zlib::NO_COMPRESSION
-    when :rasem
-      drawer.close
-      File.open(file_name, "w") { |f| f << drawer.output }
-    end
+  def file_path file_name = 'unified'
+    "#{output_directory}/#{file_name}.gif"
+  end
+
+  def save_to_file file_path
+    canvas = Magick::Image.new(grid.width, grid.height)
+    drawer.draw(canvas)
+    canvas.write file_path
+    @drawer = nil
   end
 
   def drawer
-    return @drawer if @drawer
-
-    @drawer = case type
-              when :rmagick then rmagick_drawer
-              when :chunky then chunky_drawer
-              when :rasem then rasem_drawer
-              when :canvas then som.canvas
-              else raise "unknown type '#{type}'"
-              end
+    @drawer ||= Magick::Draw.new
   end
 
-  def draw_ceils
-    normalized_distances.each_with_index do |distance, index|
-      col, row = som.grid.convert_to_coordinate index
-      polygon = create_polygon(col, row, distance)
-      draw_polygon polygon
-    end
+  def draw_polygon index
+    polygon = grid.polygon index
+    drawer.polygon *polygon
   end
 
-  def create_polygon(col, row, weight)
-    color = 256 - weight*256
-    color = Color::RGB.new(color, color, color).html
-
-    polygon = som.grid.polygon_points col, row
-    polygon << color
+  def fill weight, type
+    drawer.fill gradient_color(weight, type)
   end
 
-  def draw_polygon polygon
-    color = polygon.pop
-
-    case type
-    when :rmagick
-      drawer.fill color
-      drawer.polygon *polygon
-    when :chunky
-      drawer.polygon polygon.flatten, 0, color
-    when :rasem
-      drawer.polygon *(polygon << {fill: color})
-    when :canvas
-      polygon = TkcPolygon.new(drawer, *polygon, fill: color, tags: 'aaa bbb')
-      p polygon.id
-      p polygon.tags
-      polygon.tags = 'zzz qqq'
-      p polygon.tags
+  def gradient_color weight, type
+    scale = 1 - weight
+    if type == :hsl
+      Color::HSL.new(240*scale, 100, 50).html
+    else
+      Color::RGB.new(scale*256, scale*256, scale*256).html
     end
   end
 
   def normalized_distances
-    distances = som.neurons.map { |neuron| som.distance_with_neighbors neuron }
-    min, max = distances.min, distances.max
-    distances.map! { |distance| (distance - min) / (max - min) }
+    neurons.map { |neuron| neuron.distance_with_neighbors }.normalize
   end
 
-  def rmagick_drawer
-    require 'RMagick'
-    self.extend Magick
-    Magick::Draw.new
-  end
-
-  def chunky_drawer
-    require 'chunky_png'
-    ChunkyPNG::Image.new som.grid.width.ceil, som.grid.height.ceil
-  end
-
-  def rasem_drawer
-    require 'rasem'
-    Rasem::SVGImage.new som.grid.width.ceil, som.grid.height.ceil
-  end
-
-  def format
-    case type
-    when :rmagick then 'gif'
-    when :chunky then 'png'
-    when :rasem then 'svg'
-    end
+  def normalized_properties
+    neurons.map { |neuron| neuron.weights }.normalize(2)
   end
 end

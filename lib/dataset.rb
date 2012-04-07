@@ -1,9 +1,11 @@
 require 'csv'
-require 'normalizer'
+
+def Dataset(dataset)
+  dataset.is_a?(Dataset) ? dataset : Dataset.new(dataset)
+end
 
 class Dataset
   attr_accessor :file_path
-  attr_writer :data
 
   def initialize file_path
     self.file_path = file_path
@@ -14,15 +16,11 @@ class Dataset
   end
 
   def normalized_data
-    return @normalized_data if @normalized_data
-
-    min, max = Normalizer.find_min_and_max self.data
-    normalizer = Normalizer.new(min: min, max: max)
-    @normalized_data = self.data.map { |n| normalizer.normalize(n) }
+    @normalized_data ||= self.data.normalize(2)
   end
 
   def size
-    self.data.size
+    data.size
   end
 
   def fields
