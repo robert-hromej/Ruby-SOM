@@ -8,4 +8,7 @@ gem 'rmagick'
 gem 'rspec'
 gem 'progressbar'
 
-gem 'simplecov', :require => false#, :group => :test
+gem 'simplecov', :require => false #, :group => :test
+
+#gem 'metric_fu'
+gem 'metrical'
