@@ -21,6 +21,24 @@ class SOM
     grid.size
   end
 
+  def classify
+    neurons.each { |neuron| neuron.buckets = [] }
+
+    dataset.normalized_data.each do |data_item|
+      closest_neuron = closest data_item
+      closest_neuron.buckets << data_item
+    end
+
+    result = {}
+
+    neurons.each_with_index do |neuron, index|
+      coordinate = grid.send(:convert_to_coordinate, index)
+      result[coordinate] = neuron.buckets unless neuron.buckets.empty?
+    end
+
+    result
+  end
+
   def neurons
     return @neurons if @neurons
 
@@ -85,8 +103,14 @@ class SOM
   end
 
   def closest(data_item)
-    weights = neurons.map { |neuron| neuron.weights }
-    index = Math.closest(weights, data_item)
+    #weights = neurons.map { |neuron| neuron.weights }
+    #index = Math.closest(weights, data_item)
+
+    distances = neurons.map { |neuron| Math.euclidean_distance(data_item, neuron.weights) }
+
+    min = distances.min
+    index = distances.index(min)
+
     neurons[index]
   end
 end

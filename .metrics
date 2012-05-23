@@ -1,4 +1,0 @@
-MetricFu::Configuration.run do |config|
-  config.metrics -= [:rcov]
-  #config.metrics -= [:flog, :roodi]
-end

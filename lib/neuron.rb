@@ -2,11 +2,16 @@ require './lib/support/status_attr'
 
 class Neuron
   attr_accessor :dimension
-  attr_writer :weights
+  attr_writer :weights, :buckets
+
   status_attr :updated, :founded
 
   def initialize dimension
     self.dimension = dimension
+  end
+
+  def buckets
+    @buckets ||= []
   end
 
   def neighbors

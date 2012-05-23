@@ -1,0 +1,10 @@
+:name: "network attacks"
+:grid:
+  :type: :hexagonal
+  :rows: 50
+  :cols: 50
+  :ceil_size: 15
+:dataset: 'datasets/attacks.csv'
+:neighborhood_radius: 30
+:learning_rate: 0.8
+:epochs: 300
